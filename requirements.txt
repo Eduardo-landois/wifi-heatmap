@@ -1,0 +1,4 @@
+# Runtime dependencies for the WiFi Heat Map app
+Pillow>=10.0       # load floor plan images, export PNG reports
+numpy>=1.24        # fast math for IDW interpolation
+matplotlib>=3.7    # color maps for the heat map overlay
