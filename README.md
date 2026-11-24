@@ -16,7 +16,7 @@ that maps WiFi signal strength across a floor plan.
 | File | Purpose |
 |---|---|
 | `wifi_scanner.py` | Reads real WiFi signals using Windows' `netsh` command |
-| `heatmap.py` | Heat map interpolation and drawing (later step) |
+| `heatmap.py` | IDW interpolation, coverage summary, and the colored heat map overlay |
 | `main.py` | Tkinter GUI entry point (later step) |
 | `tests/` | Unit tests |
 
@@ -44,3 +44,30 @@ Run the tests:
 ```
 python -m unittest
 ```
+
+## Step 2: heat map engine
+`heatmap.py` turns survey points into a heat map in four steps:
+
+1. **Pick a signal per spot** (`signal_at`): the connected AP, the strongest AP of one
+   SSID, one specific BSSID, or the strongest AP overall. If the chosen network wasn't
+   heard at a spot, that spot counts as -100 dBm (a dead zone).
+2. **Fill in the gaps with IDW** (`idw_grid`), short for Inverse Distance Weighting.
+   Each spot on the map is a weighted average of the measurements, where closer
+   measurements count more:
+
+       weight = 1 / distance²
+       signal = Σ(weight × dBm) / Σ(weight)
+
+   For speed it estimates one value per 4×4-pixel block, then smooths it back to full size.
+3. **Coverage summary** (`coverage_summary`): percent of the area in each band:
+
+   | Rating | Signal |
+   |---|---|
+   | Good | -67 dBm or stronger |
+   | Weak | -80 to -67 dBm |
+   | Dead | weaker than -80 dBm |
+
+4. **Overlay** (`make_overlay`): colors the map red → yellow → green (-90 to -50 dBm)
+   as a see-through image to lay over the floor plan.
+
+There's no screen for this yet. The GUI in the next step uses these functions.
