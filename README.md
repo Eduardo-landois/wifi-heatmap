@@ -17,7 +17,7 @@ that maps WiFi signal strength across a floor plan.
 |---|---|
 | `wifi_scanner.py` | Reads real WiFi signals using Windows' `netsh` command |
 | `heatmap.py` | IDW interpolation, coverage summary, and the colored heat map overlay |
-| `main.py` | Tkinter GUI entry point (later step) |
+| `main.py` | Tkinter GUI: floor plan, click-to-scan, live heat map and coverage |
 | `tests/` | Unit tests |
 
 ## How it measures signal
@@ -70,4 +70,18 @@ python -m unittest
 4. **Overlay** (`make_overlay`): colors the map red → yellow → green (-90 to -50 dBm)
    as a see-through image to lay over the floor plan.
 
-There's no screen for this yet. The GUI in the next step uses these functions.
+## Step 3: the app (GUI)
+```
+python main.py
+```
+1. Click **Load floor plan...** to pick a PNG/JPG, or keep the **Blank grid**.
+2. Stand somewhere, then click that spot on the map. The app scans WiFi there and adds a
+   dot labeled with the signal in dBm.
+3. Walk around and repeat. The heat map and the Good / Weak / Dead percentages in the
+   status bar update after every point.
+4. Use the **Map** dropdown to choose what to map: the connected network, one network
+   (SSID), one access point (BSSID), or the strongest signal at each spot. The second
+   dropdown lists the networks heard so far.
+
+The scan runs in a background thread, so the window doesn't freeze while `netsh` works.
+Switching floor plans clears your points, because their positions belong to the old plan.
